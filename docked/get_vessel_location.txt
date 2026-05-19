@@ -1,0 +1,23 @@
+{
+   "name":"NEWSUN",
+   "imo":"9218301",
+   "mmsi":"306256000",
+   "latitude":"30.898741",
+   "longitude":"123.43308",
+   "etaUtc":"May 16, 2026 10:00 UTC",
+   "atdUtc":"Sep 28, 2025 11:08 UTC",
+   "course":"354",
+   "heading":"349",
+   "speed":"9.8",
+   "draught":"7.8 m.",
+   "navigationalStatus":"Underway using Engine",
+   "destination":"Rizhao China",
+   "lastPort":"Xiuyu China",
+   "callsign":"PJU7",
+   "positionReceived":"May 14, 2026 02:40 UTC",
+   "updateTime":"May 15, 2026 10:59 UTC",
+   "unlocodeDestination":"CNRZH",
+   "unlocodeLastport":"CNXIU",
+   "typeSpecific":"Bulk Carrier",
+   "dataSource":"Terrestrial"
+}
