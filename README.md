@@ -137,6 +137,60 @@ GET /api/auth/me/
 Authorization: Bearer <access_token>
 ```
 
+### Change password (logged in)
+
+```http
+POST /api/auth/password/change/
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "old_password": "currentpass",
+  "new_password": "newsecurepass"
+}
+```
+
+### Forgot password
+
+Sends a reset link to the user's email. The link points to your frontend (`FRONTEND_RESET_PASSWORD_URL`) with `uid` and `token` query params.
+
+```http
+POST /api/auth/password/forgot/
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+```
+
+In development (`DEBUG=True`), the response also includes `resetUrl`, `uid`, and `token` for testing. Emails are printed to the console when using the default console email backend.
+
+### Reset password (with token from email)
+
+```http
+POST /api/auth/password/reset/
+Content-Type: application/json
+
+{
+  "uid": "<uid from reset link>",
+  "token": "<token from reset link>",
+  "new_password": "newsecurepass"
+}
+```
+
+Optional email settings in `.env` for production:
+
+```env
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=your@email.com
+EMAIL_HOST_PASSWORD=your_smtp_password
+DEFAULT_FROM_EMAIL=noreply@yourdomain.com
+FRONTEND_RESET_PASSWORD_URL=https://yourapp.com/reset-password
+```
+
 ## Vessel API reference
 
 Replace `{imo_or_mmsi}` with a vessel IMO or MMSI (e.g. `9218301`). All routes require JWT authentication.
