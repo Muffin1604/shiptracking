@@ -23,7 +23,8 @@ class VesselInfoSerializer(serializers.ModelSerializer):
     yearOfBuilt = serializers.CharField(source="year_of_built", read_only=True)
     updateTime = serializers.CharField(source="update_time", read_only=True)
     dataSource = serializers.CharField(source="data_source", read_only=True)
-    fetchedAt = serializers.DateTimeField(source="fetched_at", read_only=True)
+    createdAt = serializers.DateTimeField(source="created_at", read_only=True)
+    updatedAt = serializers.DateTimeField(source="updated_at", read_only=True)
 
     class Meta:
         model = VesselInfo
@@ -72,7 +73,8 @@ class VesselInfoSerializer(serializers.ModelSerializer):
             "management",
             "updateTime",
             "dataSource",
-            "fetchedAt",
+            "createdAt",
+            "updatedAt",
         )
 
 
@@ -90,7 +92,7 @@ class VesselLocationSerializer(serializers.ModelSerializer):
     unlocodeLastport = serializers.CharField(source="unlocode_lastport", read_only=True)
     typeSpecific = serializers.CharField(source="type_specific", read_only=True)
     dataSource = serializers.CharField(source="data_source", read_only=True)
-    recordedAt = serializers.DateTimeField(source="recorded_at", read_only=True)
+    createdAt = serializers.DateTimeField(source="created_at", read_only=True)
 
     class Meta:
         model = VesselLocation
@@ -116,7 +118,7 @@ class VesselLocationSerializer(serializers.ModelSerializer):
             "unlocodeLastport",
             "typeSpecific",
             "dataSource",
-            "recordedAt",
+            "createdAt",
         )
 
 
@@ -125,7 +127,7 @@ class VesselWeatherSerializer(serializers.ModelSerializer):
     mmsi = serializers.CharField(source="vessel.mmsi", read_only=True)
     name = serializers.CharField(source="vessel.name", read_only=True)
     windSpeed = serializers.CharField(source="wind_speed", read_only=True)
-    recordedAt = serializers.DateTimeField(source="recorded_at", read_only=True)
+    createdAt = serializers.DateTimeField(source="created_at", read_only=True)
 
     class Meta:
         model = VesselWeather
@@ -136,5 +138,5 @@ class VesselWeatherSerializer(serializers.ModelSerializer):
             "temperature",
             "windSpeed",
             "waves",
-            "recordedAt",
+            "createdAt",
         )
