@@ -1,4 +1,6 @@
+import json
 from datetime import timedelta
+from pathlib import Path
 
 from django.utils import timezone
 from rest_framework import status
@@ -21,6 +23,8 @@ from vessels.services import (
 )
 
 LOCATION_CACHE_MAX_AGE = timedelta(hours=24)
+TEST_JSON_PATH = Path(__file__).resolve().parent / "test.json"
+
 
 def _resolve_vessel(imo_or_mmsi):
     vessel = VesselInfo.objects.filter(imo=imo_or_mmsi).first()
@@ -34,12 +38,12 @@ def _handle_docked_error(exc):
 
 
 class VesselListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request):
-        vessels = VesselInfo.objects.all().order_by("name")
-        serializer = VesselInfoSerializer(vessels, many=True)
-        return Response({"vessels": serializer.data})
+        with TEST_JSON_PATH.open() as f:
+            data = json.load(f)
+        return Response(data)
 
 
 class VesselInfoView(APIView):
