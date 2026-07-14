@@ -1,5 +1,8 @@
+from datetime import timedelta
+
+from django.utils import timezone
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -17,6 +20,7 @@ from vessels.services import (
     sync_vessel_weather,
 )
 
+LOCATION_CACHE_MAX_AGE = timedelta(hours=24)
 
 def _resolve_vessel(imo_or_mmsi):
     vessel = VesselInfo.objects.filter(imo=imo_or_mmsi).first()
@@ -39,38 +43,35 @@ class VesselListView(APIView):
 
 
 class VesselInfoView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, imo_or_mmsi):
         vessel = _resolve_vessel(imo_or_mmsi)
         if not vessel:
-            return Response(
-                {"detail": "Vessel not found. Sync info first."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            try:
+                vessel, _, _ = sync_vessel_info(imo_or_mmsi)
+            except DockedAPIError as exc:
+                _handle_docked_error(exc)
         return Response(VesselInfoSerializer(vessel).data)
-
-    def post(self, request, imo_or_mmsi):
-        try:
-            vessel, created, _ = sync_vessel_info(imo_or_mmsi)
-        except DockedAPIError as exc:
-            _handle_docked_error(exc)
-        return Response(
-            {"created": created, "vessel": VesselInfoSerializer(vessel).data},
-            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
-        )
 
 
 class VesselTrackView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, imo_or_mmsi):
         vessel = _resolve_vessel(imo_or_mmsi)
-        if not vessel:
-            return Response(
-                {"detail": "Vessel not found. Sync info or track first."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        latest = vessel.locations.first() if vessel else None
+        needs_refresh = (
+            vessel is None
+            or latest is None
+            or latest.created_at < timezone.now() - LOCATION_CACHE_MAX_AGE
+        )
+        if needs_refresh:
+            try:
+                location, _ = sync_vessel_location(imo_or_mmsi)
+            except DockedAPIError as exc:
+                _handle_docked_error(exc)
+            vessel = location.vessel
 
         limit = request.query_params.get("limit")
         qs = vessel.locations.all()
@@ -86,16 +87,6 @@ class VesselTrackView(APIView):
         locations = VesselLocationSerializer(qs, many=True).data
         return Response(
             {"latest": locations[0] if locations else None, "history": locations}
-        )
-
-    def post(self, request, imo_or_mmsi):
-        try:
-            location, _ = sync_vessel_location(imo_or_mmsi)
-        except DockedAPIError as exc:
-            _handle_docked_error(exc)
-        return Response(
-            {"location": VesselLocationSerializer(location).data},
-            status=status.HTTP_201_CREATED,
         )
 
 
