@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'users',
     'vessels',
     'ports',
+    'inquiries',
 ]
 
 AUTH_USER_MODEL = 'users.User'
